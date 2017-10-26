@@ -61,7 +61,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             }
             iv.setId(i + 1);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(150, 150);
-            layoutParams.setMargins((150 * i) + 40, 0, 0, 0);
+            layoutParams.setMargins(40, 0, 0, 0);
             iv.setLayoutParams(layoutParams);
             rlParent.addView(iv, layoutParams);
             iv.setOnTouchListener(this);
