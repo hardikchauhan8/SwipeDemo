@@ -17,11 +17,9 @@ import android.widget.TextView;
 public class MainActivity1 extends Activity implements View.OnTouchListener {
     int clickCount;
     private ViewGroup rlParent;
-    private int Position_X, firstMarginLeft, leftLimit1, rightLimit1, leftLimit2, rightLimit2;
-    private int Position_Y;
+    private int Position_X, leftLimit1, rightLimit1, leftLimit2, rightLimit2;
     private SparseArray<Boolean> filledChildren;
     private View firstView, secondView;
-    private int fingerCount = 0;
 
     @SuppressLint("UseSparseArrays")
     @Override
@@ -64,10 +62,10 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             iv.setId(i + 1);
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(150, 150);
             if (i > 0) {
-                int leftMargin = rlParent.getChildAt(i - 1).getLayoutParams().width * i + (20 * (i + 1));
+                int leftMargin = rlParent.getChildAt(i - 1).getLayoutParams().width * i + (40 * (i + 1));
                 layoutParams.setMargins(leftMargin, 0, 0, 0);
             } else {
-                layoutParams.setMargins(20, 0, 0, 0);
+                layoutParams.setMargins(40, 0, 0, 0);
             }
             iv.setLayoutParams(layoutParams);
             rlParent.addView(iv, layoutParams);
@@ -78,19 +76,33 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
     public boolean onTouch(final View view, MotionEvent event) {
         final int X = (int) event.getRawX();
-        final int Y = (int) event.getRawY();
-
-        int pointerCount = event.getPointerCount();
-
-
+        View nextChild = getNextChild(view.getId());
+        View prevChild = getPrevChild(view.getId());
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
-
 
             case MotionEvent.ACTION_DOWN:
 
-                if (fingerCount <= 2 && filledChildren.get(((Integer) view.getId()) - 1)) {
+                if (filledChildren.get(((Integer) view.getId()) - 1)) {
+//                    if (firstView == null) {
+//                        secondView = null;
+//                        firstView = view;
+//
+//                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) firstView.getLayoutParams();
+//                        Position_X = X - layoutParams.leftMargin;
+//                        leftLimit1 = layoutParams.leftMargin;
+//                        rightLimit1 = layoutParams.leftMargin + firstView.getWidth();
+//
+//                    } else {
+//                        secondView = view;
+//
+//                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) secondView.getLayoutParams();
+//                        Position_X = X - layoutParams.leftMargin;
+//                        leftLimit2 = layoutParams.leftMargin;
+//                        rightLimit2 = layoutParams.leftMargin + secondView.getWidth();
+//                    }
+
+
                     if (firstView == null) {
-                        fingerCount = 0;
                         secondView = null;
                         firstView = view;
 
@@ -101,16 +113,41 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
                     } else {
                         secondView = view;
+                        if (nextChild != null && nextChild.getId() == firstView.getId()) {
 
-                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) secondView.getLayoutParams();
-                        Position_X = X - layoutParams.leftMargin;
-                        leftLimit2 = layoutParams.leftMargin;
-                        rightLimit2 = layoutParams.leftMargin + secondView.getWidth();
+                            firstView = secondView;
+                            RelativeLayout.LayoutParams firstParams = (RelativeLayout.LayoutParams) firstView.getLayoutParams();
+                            Position_X = X - firstParams.leftMargin;
+                            leftLimit1 = firstParams.leftMargin;
+                            rightLimit1 = firstParams.leftMargin + firstView.getWidth();
+
+                            secondView = nextChild;
+                            RelativeLayout.LayoutParams secondParams = (RelativeLayout.LayoutParams) secondView.getLayoutParams();
+                            Position_X = X - secondParams.leftMargin;
+                            leftLimit2 = secondParams.leftMargin;
+                            rightLimit2 = secondParams.leftMargin + secondView.getWidth();
+
+                        } else if (prevChild != null && prevChild.getId() == firstView.getId()) {
+
+                            secondView = firstView;
+                            RelativeLayout.LayoutParams secondParams = (RelativeLayout.LayoutParams) secondView.getLayoutParams();
+                            Position_X = X - secondParams.leftMargin;
+                            leftLimit2 = secondParams.leftMargin;
+                            rightLimit2 = secondParams.leftMargin + secondView.getWidth();
+
+                            firstView = prevChild;
+                            RelativeLayout.LayoutParams firstParams = (RelativeLayout.LayoutParams) firstView.getLayoutParams();
+                            Position_X = X - firstParams.leftMargin;
+                            leftLimit1 = firstParams.leftMargin;
+                            rightLimit1 = firstParams.leftMargin + firstView.getWidth();
+
+                        } else {
+                            secondView = null;
+                        }
                     }
+
                 }
 
-
-                fingerCount++;
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -124,25 +161,17 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                         updateView((TextView) view, (TextView) temp);
                     }
 
-                    if (view.getId() == firstView.getId()) {
+                    if (firstView != null && view.getId() == firstView.getId()) {
                         Params.leftMargin = leftLimit1;
-
+                        firstView = null;
                     }
-                    
-                    if (view.getId() == secondView.getId()) {
+
+                    if (secondView != null && view.getId() == secondView.getId()) {
                         Params.leftMargin = leftLimit2;
+                        secondView = null;
                     }
-
                     view.setLayoutParams(Params);
-
                 }
-
-                fingerCount--;
-                if (fingerCount == 0) {
-                    firstView = null;
-                }
-
-
                 break;
 
 
@@ -150,11 +179,6 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
 
                 if (firstView != null && secondView != null && filledChildren.get(((Integer) view.getId()) - 1)) {
-                    Log.d("ON_TOUCH", "true");
-
-                    Log.e("Pointer ---->", "" + pointerCount);
-                    Log.e("Action Index ---->", "" + event.getActionIndex());
-
 
                     if (view.getId() == firstView.getId()) {
                         RelativeLayout.LayoutParams layoutParams1 = (RelativeLayout.LayoutParams) firstView.getLayoutParams();
