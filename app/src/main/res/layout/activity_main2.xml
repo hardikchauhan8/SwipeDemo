@@ -9,7 +9,7 @@
     android:paddingTop="16dp"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/rlParent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -11,15 +11,17 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class MainActivity1 extends Activity implements View.OnTouchListener {
     int clickCount;
     private ViewGroup rlParent;
-    private int Position_X, firstMarginLeft, leftLimit, rightLimit;
+    private int Position_X, firstMarginLeft, leftLimit1, rightLimit1, leftLimit2, rightLimit2;
     private int Position_Y;
     private SparseArray<Boolean> filledChildren;
+    private View firstView, secondView;
+    private int fingerCount = 0;
 
     @SuppressLint("UseSparseArrays")
     @Override
@@ -51,7 +53,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             iv.setTextSize(28f);
             iv.setGravity(Gravity.CENTER);
 
-            if (i % 3 == 0) {
+            if (i % 3 == 0 || i == 4) {
                 iv.setBackgroundColor(Color.parseColor("#000000"));
                 iv.setText("" + i);
                 filledChildren.put(i, true);
@@ -60,8 +62,13 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                 filledChildren.put(i, false);
             }
             iv.setId(i + 1);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(150, 150);
-            layoutParams.setMargins(40, 0, 0, 0);
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(150, 150);
+            if (i > 0) {
+                int leftMargin = rlParent.getChildAt(i - 1).getLayoutParams().width * i + (20 * (i + 1));
+                layoutParams.setMargins(leftMargin, 0, 0, 0);
+            } else {
+                layoutParams.setMargins(20, 0, 0, 0);
+            }
             iv.setLayoutParams(layoutParams);
             rlParent.addView(iv, layoutParams);
             iv.setOnTouchListener(this);
@@ -78,58 +85,121 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
 
+
             case MotionEvent.ACTION_DOWN:
-                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) view.getLayoutParams();
-                Position_X = X - layoutParams.leftMargin;
-                leftLimit = layoutParams.leftMargin;
-                rightLimit = layoutParams.leftMargin + view.getWidth();
-//                Position_Y = Y - layoutParams.topMargin;
+
+                if (fingerCount <= 2 && filledChildren.get(((Integer) view.getId()) - 1)) {
+                    if (firstView == null) {
+                        fingerCount = 0;
+                        secondView = null;
+                        firstView = view;
+
+                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) firstView.getLayoutParams();
+                        Position_X = X - layoutParams.leftMargin;
+                        leftLimit1 = layoutParams.leftMargin;
+                        rightLimit1 = layoutParams.leftMargin + firstView.getWidth();
+
+                    } else {
+                        secondView = view;
+
+                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) secondView.getLayoutParams();
+                        Position_X = X - layoutParams.leftMargin;
+                        leftLimit2 = layoutParams.leftMargin;
+                        rightLimit2 = layoutParams.leftMargin + secondView.getWidth();
+                    }
+                }
+
+
+                fingerCount++;
                 break;
 
             case MotionEvent.ACTION_UP:
 
-                break;
-            case MotionEvent.ACTION_POINTER_DOWN:
+                if (filledChildren.get((Integer) view.getId() - 1)) {
+
+                    RelativeLayout.LayoutParams Params = (RelativeLayout.LayoutParams) view.getLayoutParams();
+
+                    View temp = getChild(view.getId(), (Params.leftMargin + (view.getWidth() / 2)));
+                    if (temp != null) {
+                        updateView((TextView) view, (TextView) temp);
+                    }
+
+                    if (view.getId() == firstView.getId()) {
+                        Params.leftMargin = leftLimit1;
+
+                    }
+                    
+                    if (view.getId() == secondView.getId()) {
+                        Params.leftMargin = leftLimit2;
+                    }
+
+                    view.setLayoutParams(Params);
+
+                }
+
+                fingerCount--;
+                if (fingerCount == 0) {
+                    firstView = null;
+                }
+
+
                 break;
 
-            case MotionEvent.ACTION_POINTER_UP:
-                break;
 
             case MotionEvent.ACTION_MOVE:
 
 
-                if (filledChildren.get(((Integer) view.getId()) - 1)) {
+                if (firstView != null && secondView != null && filledChildren.get(((Integer) view.getId()) - 1)) {
                     Log.d("ON_TOUCH", "true");
 
-                    LinearLayout.LayoutParams Params = (LinearLayout.LayoutParams) view.getLayoutParams();
+                    Log.e("Pointer ---->", "" + pointerCount);
+                    Log.e("Action Index ---->", "" + event.getActionIndex());
 
-                    Params.leftMargin = X - Position_X;
-                    view.setLayoutParams(Params);
 
-                    if (Params.leftMargin > leftLimit) {
-                        Params.leftMargin = X - Position_X;
-                        view.setLayoutParams(Params);
-                    } else {
-                        Params.leftMargin = leftLimit;
-                        view.setLayoutParams(Params);
+                    if (view.getId() == firstView.getId()) {
+                        RelativeLayout.LayoutParams layoutParams1 = (RelativeLayout.LayoutParams) firstView.getLayoutParams();
+
+                        layoutParams1.leftMargin = X - Position_X;
+                        firstView.setLayoutParams(layoutParams1);
+
+                        if (layoutParams1.leftMargin > leftLimit1) {
+                            layoutParams1.leftMargin = X - Position_X;
+                            firstView.setLayoutParams(layoutParams1);
+                        } else {
+                            layoutParams1.leftMargin = leftLimit1;
+                            firstView.setLayoutParams(layoutParams1);
+                        }
                     }
 
-                    if (Params.leftMargin > firstMarginLeft) {
 
-                        Log.d("ON_TOUCH", "Moving to right!");
-                        firstMarginLeft = Params.leftMargin;
-                    } else {
-                        Log.d("ON_TOUCH", "Moving to left!");
-                        firstMarginLeft = Params.leftMargin;
+                    if (view.getId() == secondView.getId()) {
+                        RelativeLayout.LayoutParams layoutParams2 = (RelativeLayout.LayoutParams) secondView.getLayoutParams();
+
+                        layoutParams2.leftMargin = X - Position_X;
+                        secondView.setLayoutParams(layoutParams2);
+
+                        if ((layoutParams2.leftMargin + view.getWidth()) < rightLimit2) {
+                            layoutParams2.leftMargin = X - Position_X;
+                            secondView.setLayoutParams(layoutParams2);
+                        } else {
+                            layoutParams2.leftMargin = rightLimit2 - view.getWidth();
+                            secondView.setLayoutParams(layoutParams2);
+                        }
                     }
 
-//                if ((Params.leftMargin + view.getWidth()) < rightLimit) {
-//                    Params.leftMargin = X - Position_X;
-//                    view.setLayoutParams(Params);
-//                } else {
-//                    Params.leftMargin = rightLimit - view.getWidth();
-//                    view.setLayoutParams(Params);
-//                }
+
+//                    Log.d("leftMargin", "" + layoutParams1.leftMargin);
+//                    Log.d("firstMarginLeft", "" + firstMarginLeft);
+
+//                    if (layoutParams1.leftMargin > firstMarginLeft) {
+//
+//                        Log.d("ON_TOUCH", "Moving to right!");
+//                        firstMarginLeft = layoutParams1.leftMargin;
+//                    } else {
+//                        Log.d("ON_TOUCH", "Moving to left!");
+//                        firstMarginLeft = layoutParams1.leftMargin;
+//                    }
+
 
                 } else {
                     Log.d("ON_TOUCH", "false");
@@ -141,6 +211,29 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 // Schedules a repaint for the root Layout.
         rlParent.invalidate();
         return true;
+    }
+
+    @SuppressLint("ResourceType")
+    private void updateView(TextView srcView, TextView destView) {
+        destView.setText(srcView.getText().toString());
+        destView.setBackgroundColor(Color.parseColor("#000000"));
+        filledChildren.put(destView.getId() - 1, true);
+
+        srcView.setText("");
+        srcView.setBackgroundColor(Color.parseColor("#10000000"));
+        filledChildren.put(srcView.getId() - 1, false);
+    }
+
+    private View getChild(int id, float leftMargin) {
+
+        int childCount = rlParent.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View temp = rlParent.getChildAt(i);
+            if (!filledChildren.get(i) && temp.getLeft() < leftMargin && temp.getRight() > leftMargin && id != temp.getId()) {
+                return temp;
+            }
+        }
+        return null;
     }
 
     private View getNextChild(int id) {
@@ -164,5 +257,6 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
         }
         return null;
     }
+
 
 }
