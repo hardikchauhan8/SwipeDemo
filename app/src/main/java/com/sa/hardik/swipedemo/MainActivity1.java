@@ -17,9 +17,9 @@ import android.widget.TextView;
 public class MainActivity1 extends Activity implements View.OnTouchListener {
     int clickCount;
     private ViewGroup rlParent;
-    private int Position_X, leftLimit1, rightLimit1, leftLimit2, rightLimit2;
+    private int firstX, secondX, leftLimit1, rightLimit1, leftLimit2, rightLimit2;
     private SparseArray<Boolean> filledChildren;
-    private View firstView, secondView;
+    private View leftView, rightView;
 
     @SuppressLint("UseSparseArrays")
     @Override
@@ -44,7 +44,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
 
     private void Add_Image() {
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 7; i++) {
             final TextView iv = new TextView(this);
 
             iv.setTextColor(Color.WHITE);
@@ -62,10 +62,10 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             iv.setId(i + 1);
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(150, 150);
             if (i > 0) {
-                int leftMargin = rlParent.getChildAt(i - 1).getLayoutParams().width * i + (40 * (i + 1));
+                int leftMargin = rlParent.getChildAt(i - 1).getLayoutParams().width * i + (60 * (i + 1));
                 layoutParams.setMargins(leftMargin, 0, 0, 0);
             } else {
-                layoutParams.setMargins(40, 0, 0, 0);
+                layoutParams.setMargins(60, 0, 0, 0);
             }
             iv.setLayoutParams(layoutParams);
             rlParent.addView(iv, layoutParams);
@@ -76,73 +76,62 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
     public boolean onTouch(final View view, MotionEvent event) {
         final int X = (int) event.getRawX();
-        View nextChild = getNextChild(view.getId());
-        View prevChild = getPrevChild(view.getId());
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
 
             case MotionEvent.ACTION_DOWN:
 
                 if (filledChildren.get(((Integer) view.getId()) - 1)) {
-//                    if (firstView == null) {
-//                        secondView = null;
-//                        firstView = view;
-//
-//                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) firstView.getLayoutParams();
-//                        Position_X = X - layoutParams.leftMargin;
-//                        leftLimit1 = layoutParams.leftMargin;
-//                        rightLimit1 = layoutParams.leftMargin + firstView.getWidth();
-//
-//                    } else {
-//                        secondView = view;
-//
-//                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) secondView.getLayoutParams();
-//                        Position_X = X - layoutParams.leftMargin;
-//                        leftLimit2 = layoutParams.leftMargin;
-//                        rightLimit2 = layoutParams.leftMargin + secondView.getWidth();
-//                    }
 
+                    if (leftView == null) {
+                        rightView = null;
+                        leftView = view;
 
-                    if (firstView == null) {
-                        secondView = null;
-                        firstView = view;
-
-                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) firstView.getLayoutParams();
-                        Position_X = X - layoutParams.leftMargin;
+                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) leftView.getLayoutParams();
+                        firstX = Math.abs(X - layoutParams.leftMargin);
                         leftLimit1 = layoutParams.leftMargin;
-                        rightLimit1 = layoutParams.leftMargin + firstView.getWidth();
+                        rightLimit1 = layoutParams.leftMargin + leftView.getWidth();
+
+                        Log.e("leftLimit1", "" + leftLimit1);
+                        Log.e("rightLimit1", "" + rightLimit1);
 
                     } else {
-                        secondView = view;
-                        if (nextChild != null && nextChild.getId() == firstView.getId()) {
 
-                            firstView = secondView;
-                            RelativeLayout.LayoutParams firstParams = (RelativeLayout.LayoutParams) firstView.getLayoutParams();
-                            Position_X = X - firstParams.leftMargin;
-                            leftLimit1 = firstParams.leftMargin;
-                            rightLimit1 = firstParams.leftMargin + firstView.getWidth();
+                        View nextChild = getNextChild(view.getId());
+                        View prevChild = getPrevChild(view.getId());
 
-                            secondView = nextChild;
-                            RelativeLayout.LayoutParams secondParams = (RelativeLayout.LayoutParams) secondView.getLayoutParams();
-                            Position_X = X - secondParams.leftMargin;
+                        if (nextChild != null && nextChild.getId() == leftView.getId()) {
+
+                            rightView = leftView;
+                            RelativeLayout.LayoutParams secondParams = (RelativeLayout.LayoutParams) rightView.getLayoutParams();
+                            secondX = Math.abs(X - secondParams.leftMargin);
                             leftLimit2 = secondParams.leftMargin;
-                            rightLimit2 = secondParams.leftMargin + secondView.getWidth();
+                            rightLimit2 = secondParams.leftMargin + rightView.getWidth();
 
-                        } else if (prevChild != null && prevChild.getId() == firstView.getId()) {
+                            Log.e("leftLimit2", "" + leftLimit2);
+                            Log.e("rightLimit2", "" + rightLimit2);
 
-                            secondView = firstView;
-                            RelativeLayout.LayoutParams secondParams = (RelativeLayout.LayoutParams) secondView.getLayoutParams();
-                            Position_X = X - secondParams.leftMargin;
-                            leftLimit2 = secondParams.leftMargin;
-                            rightLimit2 = secondParams.leftMargin + secondView.getWidth();
-
-                            firstView = prevChild;
-                            RelativeLayout.LayoutParams firstParams = (RelativeLayout.LayoutParams) firstView.getLayoutParams();
-                            Position_X = X - firstParams.leftMargin;
+                            leftView = view;
+                            RelativeLayout.LayoutParams firstParams = (RelativeLayout.LayoutParams) leftView.getLayoutParams();
+                            firstX = Math.abs(X - firstParams.leftMargin);
                             leftLimit1 = firstParams.leftMargin;
-                            rightLimit1 = firstParams.leftMargin + firstView.getWidth();
+                            rightLimit1 = firstParams.leftMargin + leftView.getWidth();
+
+                            Log.e("leftLimit1", "" + leftLimit1);
+                            Log.e("rightLimit1", "" + rightLimit1);
+
+                        } else if (prevChild != null && prevChild.getId() == leftView.getId()) {
+
+                            rightView = view;
+                            RelativeLayout.LayoutParams secondParams = (RelativeLayout.LayoutParams) rightView.getLayoutParams();
+                            secondX = Math.abs(X - secondParams.leftMargin);
+                            leftLimit2 = secondParams.leftMargin;
+                            rightLimit2 = secondParams.leftMargin + rightView.getWidth();
+
+                            Log.e("leftLimit2", "" + leftLimit2);
+                            Log.e("rightLimit2", "" + rightLimit2);
 
                         } else {
-                            secondView = null;
+                            rightView = null;
                         }
                     }
 
@@ -161,14 +150,14 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                         updateView((TextView) view, (TextView) temp);
                     }
 
-                    if (firstView != null && view.getId() == firstView.getId()) {
+                    if (leftView != null && view.getId() == leftView.getId()) {
                         Params.leftMargin = leftLimit1;
-                        firstView = null;
+                        leftView = null;
                     }
 
-                    if (secondView != null && view.getId() == secondView.getId()) {
+                    if (rightView != null && view.getId() == rightView.getId()) {
                         Params.leftMargin = leftLimit2;
-                        secondView = null;
+                        rightView = null;
                     }
                     view.setLayoutParams(Params);
                 }
@@ -178,51 +167,42 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             case MotionEvent.ACTION_MOVE:
 
 
-                if (firstView != null && secondView != null && filledChildren.get(((Integer) view.getId()) - 1)) {
+                if (leftView != null && rightView != null && filledChildren.get(((Integer) view.getId()) - 1)) {
 
-                    if (view.getId() == firstView.getId()) {
-                        RelativeLayout.LayoutParams layoutParams1 = (RelativeLayout.LayoutParams) firstView.getLayoutParams();
 
-                        layoutParams1.leftMargin = X - Position_X;
-                        firstView.setLayoutParams(layoutParams1);
+                    if (view.getId() == leftView.getId()) {
+                        RelativeLayout.LayoutParams layoutParams1 = (RelativeLayout.LayoutParams) leftView.getLayoutParams();
 
-                        if (layoutParams1.leftMargin > leftLimit1) {
-                            layoutParams1.leftMargin = X - Position_X;
-                            firstView.setLayoutParams(layoutParams1);
+                        layoutParams1.leftMargin = X - firstX;
+                        leftView.setLayoutParams(layoutParams1);
+
+                        if ((layoutParams1.leftMargin + view.getWidth()) < rightLimit1) {
+                            layoutParams1.leftMargin = X - firstX;
+                            leftView.setLayoutParams(layoutParams1);
                         } else {
-                            layoutParams1.leftMargin = leftLimit1;
-                            firstView.setLayoutParams(layoutParams1);
+                            layoutParams1.leftMargin = rightLimit1 - view.getWidth();
+                            leftView.setLayoutParams(layoutParams1);
                         }
+
+                        Log.e("layoutParams1.leftMargin", "" + layoutParams1.leftMargin);
                     }
 
 
-                    if (view.getId() == secondView.getId()) {
-                        RelativeLayout.LayoutParams layoutParams2 = (RelativeLayout.LayoutParams) secondView.getLayoutParams();
+                    if (view.getId() == rightView.getId()) {
+                        RelativeLayout.LayoutParams layoutParams2 = (RelativeLayout.LayoutParams) rightView.getLayoutParams();
 
-                        layoutParams2.leftMargin = X - Position_X;
-                        secondView.setLayoutParams(layoutParams2);
+                        layoutParams2.leftMargin = X - secondX;
+                        rightView.setLayoutParams(layoutParams2);
 
-                        if ((layoutParams2.leftMargin + view.getWidth()) < rightLimit2) {
-                            layoutParams2.leftMargin = X - Position_X;
-                            secondView.setLayoutParams(layoutParams2);
+                        if (layoutParams2.leftMargin > leftLimit2) {
+                            layoutParams2.leftMargin = X - secondX;
+                            rightView.setLayoutParams(layoutParams2);
                         } else {
-                            layoutParams2.leftMargin = rightLimit2 - view.getWidth();
-                            secondView.setLayoutParams(layoutParams2);
+                            layoutParams2.leftMargin = leftLimit2;
+                            rightView.setLayoutParams(layoutParams2);
                         }
+                        Log.e("layoutParams2.leftMargin", "" + layoutParams2.leftMargin);
                     }
-
-
-//                    Log.d("leftMargin", "" + layoutParams1.leftMargin);
-//                    Log.d("firstMarginLeft", "" + firstMarginLeft);
-
-//                    if (layoutParams1.leftMargin > firstMarginLeft) {
-//
-//                        Log.d("ON_TOUCH", "Moving to right!");
-//                        firstMarginLeft = layoutParams1.leftMargin;
-//                    } else {
-//                        Log.d("ON_TOUCH", "Moving to left!");
-//                        firstMarginLeft = layoutParams1.leftMargin;
-//                    }
 
 
                 } else {
