@@ -23,4 +23,23 @@
         android:text="Add New Image"
         android:visibility="gone" />
 
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/rlParent"
+        android:layout_marginEnd="111dp"
+        android:layout_marginTop="136dp"
+        android:text="Button" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/button"
+        android:layout_marginEnd="26dp"
+        android:layout_toLeftOf="@+id/button"
+        android:text="Button" />
+
 </RelativeLayout>

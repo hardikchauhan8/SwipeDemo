@@ -19,7 +19,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
     private ViewGroup rlParent;
     private int firstX, secondX, leftLimit1, rightLimit1, leftLimit2, rightLimit2;
     private SparseArray<Boolean> filledChildren;
-    private View leftView, rightView;
+    private View leftView, rightView, lastElementLeftChain, lastElementRightChain;
 
     @SuppressLint("UseSparseArrays")
     @Override
@@ -43,9 +43,9 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
     }
 
 
-    // To add dinamic views
+    // To add dynamic views
     private void Add_Image() {
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 8; i++) {
             final TextView iv = new TextView(this);
 
             iv.setTextColor(Color.WHITE);
@@ -53,7 +53,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             iv.setGravity(Gravity.CENTER);
 
             // To add blank and filled views
-            if (i % 3 == 0 || i == 4) {
+            if (i == 2 || i == 3 || i == 4 || i == 5) {
                 iv.setBackgroundColor(Color.parseColor("#000000"));
                 iv.setText("" + i);
                 filledChildren.put(i, true);
@@ -94,6 +94,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                         leftLimit1 = layoutParams.leftMargin;
                         rightLimit1 = layoutParams.leftMargin + leftView.getWidth();
 
+                        createLeftChain(leftView);
                     } else {
 
                         View nextChild = getNextChild(view.getId()); // get the previews view of second touched view
@@ -108,6 +109,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                             secondX = Math.abs(X - secondParams.leftMargin);
                             leftLimit2 = secondParams.leftMargin;
                             rightLimit2 = secondParams.leftMargin + rightView.getWidth();
+                            createRightChain(rightView);
 
                             // assign the second touched view to left view
                             leftView = view;
@@ -115,7 +117,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                             firstX = Math.abs(X - firstParams.leftMargin);
                             leftLimit1 = firstParams.leftMargin;
                             rightLimit1 = firstParams.leftMargin + leftView.getWidth();
-
+                            createLeftChain(leftView);
                             // Note : This will add the left view to the left finger and right view to the right finger touched
 
                         } else if (prevChild != null && prevChild.getId() == leftView.getId()) {// To check weather the First touched view is previous view of second touched view
@@ -126,7 +128,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                             secondX = Math.abs(X - secondParams.leftMargin);
                             leftLimit2 = secondParams.leftMargin;
                             rightLimit2 = secondParams.leftMargin + rightView.getWidth();
-
+                            createRightChain(rightView);
                         } else {
 
                             // if all the cases are wrong or some invalid case,
@@ -134,7 +136,12 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                             rightView = null;
                         }
                     }
+                }
 
+                if (leftView != null && rightView != null) {
+
+                    Log.e("leftView text ----> ", ((TextView) leftView).getText().toString());
+                    Log.e("rightView text ----> ", ((TextView) rightView).getText().toString());
                 }
 
                 break;
@@ -174,39 +181,49 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
                     if (view.getId() == leftView.getId()) { // For the left view
 
-                        RelativeLayout.LayoutParams layoutParams1 = (RelativeLayout.LayoutParams) leftView.getLayoutParams();
+                        RelativeLayout.LayoutParams leftViewParams = (RelativeLayout.LayoutParams) leftView.getLayoutParams();
+                        RelativeLayout.LayoutParams lastLeftChainElemParam = (RelativeLayout.LayoutParams) lastElementLeftChain.getLayoutParams();
 
-                        layoutParams1.leftMargin = X - firstX;
-                        leftView.setLayoutParams(layoutParams1);
+                        leftViewParams.leftMargin = X - firstX;
+                        leftView.setLayoutParams(leftViewParams);
 
-                        if ((layoutParams1.leftMargin + view.getWidth()) < rightLimit1) { // If moving view is left view than restrict that view to move right of its current position
-                            layoutParams1.leftMargin = X - firstX;
-                            leftView.setLayoutParams(layoutParams1);
+                        Log.e("lastElementLeftChain.getWidth() ----> ", "" + lastElementLeftChain.getWidth());
+                        Log.e("lastLeftChainElemParam.leftMargin ----> ", "" + lastLeftChainElemParam.leftMargin);
+
+                        if (leftViewParams.leftMargin < Math.abs(lastLeftChainElemParam.leftMargin) + 60) {
+                            leftViewParams.leftMargin = Math.abs(lastLeftChainElemParam.leftMargin) + 60;
+                            leftView.setLayoutParams(leftViewParams);
+                        } else if ((leftViewParams.leftMargin + view.getWidth()) < rightLimit1) { // If moving view is left view than restrict that view to move right of its current position
+                            leftViewParams.leftMargin = X - firstX;
+                            leftView.setLayoutParams(leftViewParams);
                         } else {
-                            layoutParams1.leftMargin = rightLimit1 - view.getWidth();
-                            leftView.setLayoutParams(layoutParams1);
+                            leftViewParams.leftMargin = rightLimit1 - view.getWidth();
+                            leftView.setLayoutParams(leftViewParams);
                         }
 
-                        Log.e("layoutParams1.leftMargin", "" + layoutParams1.leftMargin);
                     }
 
 
                     if (view.getId() == rightView.getId()) { // For the left view
-                        RelativeLayout.LayoutParams layoutParams2 = (RelativeLayout.LayoutParams) rightView.getLayoutParams();
+                        RelativeLayout.LayoutParams rightViewParams = (RelativeLayout.LayoutParams) rightView.getLayoutParams();
+                        RelativeLayout.LayoutParams lastRightChainElemParam = (RelativeLayout.LayoutParams) lastElementRightChain.getLayoutParams();
 
-                        layoutParams2.leftMargin = X - secondX;
-                        rightView.setLayoutParams(layoutParams2);
+                        rightViewParams.leftMargin = X - secondX;
+                        rightView.setLayoutParams(rightViewParams);
 
-                        if (layoutParams2.leftMargin > leftLimit2) { // If moving view is right view than restrict that view to move left of its current position
-                            layoutParams2.leftMargin = X - secondX;
-                            rightView.setLayoutParams(layoutParams2);
+//                        if (rightViewParams.leftMargin > lastLeftChainElemParam.leftMargin + lastElementLeftChain.getWidth()) {
+//                            rightViewParams.leftMargin = lastLeftChainElemParam.leftMargin + lastElementLeftChain.getWidth();
+//                            rightView.setLayoutParams(rightViewParams);
+//                        } else
+                        if (rightViewParams.leftMargin > leftLimit2) { // If moving view is right view than restrict that view to move left of its current position
+                            rightViewParams.leftMargin = X - secondX;
+                            rightView.setLayoutParams(rightViewParams);
                         } else {
-                            layoutParams2.leftMargin = leftLimit2;
-                            rightView.setLayoutParams(layoutParams2);
+                            rightViewParams.leftMargin = leftLimit2;
+                            rightView.setLayoutParams(rightViewParams);
                         }
-                        Log.e("layoutParams2.leftMargin", "" + layoutParams2.leftMargin);
-                    }
 
+                    }
 
                 } else {
                     Log.d("ON_TOUCH", "false");
@@ -218,6 +235,37 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
         // Schedules a repaint for the root Layout.
         rlParent.invalidate();
         return true;
+    }
+
+    @SuppressLint("ResourceType")
+    private void createLeftChain(View leftView) {
+
+        int id = leftView.getId();
+        while (filledChildren.get(id)) {
+            View tempPrev = getPrevChild(id);
+            RelativeLayout.LayoutParams tempParams = (RelativeLayout.LayoutParams) tempPrev.getLayoutParams();
+            tempParams.addRule(RelativeLayout.ALIGN_TOP, id);
+            tempParams.addRule(RelativeLayout.ALIGN_LEFT, id);
+            tempParams.setMargins(-210, 0, 210, 0);
+            tempPrev.setLayoutParams(tempParams);
+            lastElementLeftChain = tempPrev;
+            id = tempPrev.getId() - 1;
+        }
+    }
+
+    private void createRightChain(View rightView) {
+
+        @SuppressLint("ResourceType") int id = rightView.getId();
+        while (filledChildren.get(id)) {
+            View tempNext = getNextChild(id);
+            RelativeLayout.LayoutParams tempParams = (RelativeLayout.LayoutParams) tempNext.getLayoutParams();
+            tempParams.addRule(RelativeLayout.ALIGN_TOP, id);
+            tempParams.addRule(RelativeLayout.RIGHT_OF, id);
+            tempParams.setMargins(60, 0, 0, 0);
+            tempNext.setLayoutParams(tempParams);
+            lastElementRightChain = tempNext;
+            id = tempNext.getId();
+        }
     }
 
     // Update the style view of srcview and destview
