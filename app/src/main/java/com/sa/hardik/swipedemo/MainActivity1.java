@@ -43,6 +43,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
     }
 
 
+    // To add dinamic views
     private void Add_Image() {
         for (int i = 0; i < 7; i++) {
             final TextView iv = new TextView(this);
@@ -51,6 +52,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             iv.setTextSize(28f);
             iv.setGravity(Gravity.CENTER);
 
+            // To add blank and filled views
             if (i % 3 == 0 || i == 4) {
                 iv.setBackgroundColor(Color.parseColor("#000000"));
                 iv.setText("" + i);
@@ -80,57 +82,55 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
             case MotionEvent.ACTION_DOWN:
 
-                if (filledChildren.get(((Integer) view.getId()) - 1)) {
+                if (filledChildren.get(((Integer) view.getId()) - 1)) { // To check weather touched view is filled or blank if blank than not allow the touch
 
                     if (leftView == null) {
                         rightView = null;
                         leftView = view;
 
+                        // Assign the first touched view into leftView
                         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) leftView.getLayoutParams();
                         firstX = Math.abs(X - layoutParams.leftMargin);
                         leftLimit1 = layoutParams.leftMargin;
                         rightLimit1 = layoutParams.leftMargin + leftView.getWidth();
 
-                        Log.e("leftLimit1", "" + leftLimit1);
-                        Log.e("rightLimit1", "" + rightLimit1);
-
                     } else {
 
-                        View nextChild = getNextChild(view.getId());
-                        View prevChild = getPrevChild(view.getId());
+                        View nextChild = getNextChild(view.getId()); // get the previews view of second touched view
+                        View prevChild = getPrevChild(view.getId()); // get the next view of second touched view
 
-                        if (nextChild != null && nextChild.getId() == leftView.getId()) {
 
+                        if (nextChild != null && nextChild.getId() == leftView.getId()) { // To check weather the First touched view is next view of second touched view
+
+                            // assign the leftview to rightview
                             rightView = leftView;
                             RelativeLayout.LayoutParams secondParams = (RelativeLayout.LayoutParams) rightView.getLayoutParams();
                             secondX = Math.abs(X - secondParams.leftMargin);
                             leftLimit2 = secondParams.leftMargin;
                             rightLimit2 = secondParams.leftMargin + rightView.getWidth();
 
-                            Log.e("leftLimit2", "" + leftLimit2);
-                            Log.e("rightLimit2", "" + rightLimit2);
-
+                            // assign the second touched view to left view
                             leftView = view;
                             RelativeLayout.LayoutParams firstParams = (RelativeLayout.LayoutParams) leftView.getLayoutParams();
                             firstX = Math.abs(X - firstParams.leftMargin);
                             leftLimit1 = firstParams.leftMargin;
                             rightLimit1 = firstParams.leftMargin + leftView.getWidth();
 
-                            Log.e("leftLimit1", "" + leftLimit1);
-                            Log.e("rightLimit1", "" + rightLimit1);
+                            // Note : This will add the left view to the left finger and right view to the right finger touched
 
-                        } else if (prevChild != null && prevChild.getId() == leftView.getId()) {
+                        } else if (prevChild != null && prevChild.getId() == leftView.getId()) {// To check weather the First touched view is previous view of second touched view
 
+                            // assign second touched view to the right view
                             rightView = view;
                             RelativeLayout.LayoutParams secondParams = (RelativeLayout.LayoutParams) rightView.getLayoutParams();
                             secondX = Math.abs(X - secondParams.leftMargin);
                             leftLimit2 = secondParams.leftMargin;
                             rightLimit2 = secondParams.leftMargin + rightView.getWidth();
 
-                            Log.e("leftLimit2", "" + leftLimit2);
-                            Log.e("rightLimit2", "" + rightLimit2);
-
                         } else {
+
+                            // if all the cases are wrong or some invalid case,
+                            // for example, touched view are not near most neighbours to each other or there is a third touch than it will just invalidate the second touched view to avoid any ambiguty
                             rightView = null;
                         }
                     }
@@ -141,7 +141,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
             case MotionEvent.ACTION_UP:
 
-                if (filledChildren.get((Integer) view.getId() - 1)) {
+                if (filledChildren.get((Integer) view.getId() - 1)) { // To check weather touched view is filled or blank if blank than not allow the touch
 
                     RelativeLayout.LayoutParams Params = (RelativeLayout.LayoutParams) view.getLayoutParams();
 
@@ -150,15 +150,17 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                         updateView((TextView) view, (TextView) temp);
                     }
 
-                    if (leftView != null && view.getId() == leftView.getId()) {
+                    if (leftView != null && view.getId() == leftView.getId()) { // If the Left view is released than move to the relative position and release that object
                         Params.leftMargin = leftLimit1;
                         leftView = null;
                     }
 
-                    if (rightView != null && view.getId() == rightView.getId()) {
+                    if (rightView != null && view.getId() == rightView.getId()) { // If the right view is released than move to the relative position and release that object
                         Params.leftMargin = leftLimit2;
                         rightView = null;
                     }
+
+                    // If the view is moved upon to blank view than change those views
                     view.setLayoutParams(Params);
                 }
                 break;
@@ -167,16 +169,17 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             case MotionEvent.ACTION_MOVE:
 
 
-                if (leftView != null && rightView != null && filledChildren.get(((Integer) view.getId()) - 1)) {
+                if (leftView != null && rightView != null && filledChildren.get(((Integer) view.getId()) - 1)) { // To check weather left and right view are not null and touched view is filled or blank if blank than not allow the touch
 
 
-                    if (view.getId() == leftView.getId()) {
+                    if (view.getId() == leftView.getId()) { // For the left view
+
                         RelativeLayout.LayoutParams layoutParams1 = (RelativeLayout.LayoutParams) leftView.getLayoutParams();
 
                         layoutParams1.leftMargin = X - firstX;
                         leftView.setLayoutParams(layoutParams1);
 
-                        if ((layoutParams1.leftMargin + view.getWidth()) < rightLimit1) {
+                        if ((layoutParams1.leftMargin + view.getWidth()) < rightLimit1) { // If moving view is left view than restrict that view to move right of its current position
                             layoutParams1.leftMargin = X - firstX;
                             leftView.setLayoutParams(layoutParams1);
                         } else {
@@ -188,13 +191,13 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                     }
 
 
-                    if (view.getId() == rightView.getId()) {
+                    if (view.getId() == rightView.getId()) { // For the left view
                         RelativeLayout.LayoutParams layoutParams2 = (RelativeLayout.LayoutParams) rightView.getLayoutParams();
 
                         layoutParams2.leftMargin = X - secondX;
                         rightView.setLayoutParams(layoutParams2);
 
-                        if (layoutParams2.leftMargin > leftLimit2) {
+                        if (layoutParams2.leftMargin > leftLimit2) { // If moving view is right view than restrict that view to move left of its current position
                             layoutParams2.leftMargin = X - secondX;
                             rightView.setLayoutParams(layoutParams2);
                         } else {
@@ -212,13 +215,15 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                 break;
         }
 
-// Schedules a repaint for the root Layout.
+        // Schedules a repaint for the root Layout.
         rlParent.invalidate();
         return true;
     }
 
+    // Update the style view of srcview and destview
     @SuppressLint("ResourceType")
     private void updateView(TextView srcView, TextView destView) {
+
         destView.setText(srcView.getText().toString());
         destView.setBackgroundColor(Color.parseColor("#000000"));
         filledChildren.put(destView.getId() - 1, true);
@@ -228,6 +233,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
         filledChildren.put(srcView.getId() - 1, false);
     }
 
+    // get the view based on the id and its position
     private View getChild(int id, float leftMargin) {
 
         int childCount = rlParent.getChildCount();
@@ -240,6 +246,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
         return null;
     }
 
+    // get the next view based on the current view id
     private View getNextChild(int id) {
 
         int childCount = rlParent.getChildCount();
@@ -251,6 +258,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
         return null;
     }
 
+    // get the previous view based on the current view id
     private View getPrevChild(int id) {
 
         int childCount = rlParent.getChildCount();
