@@ -17,7 +17,7 @@ import android.widget.TextView;
 public class MainActivity1 extends Activity implements View.OnTouchListener {
     int clickCount;
     private ViewGroup rlParent;
-    private int firstX, secondX, leftLimit1, rightLimit1, leftLimit2, rightLimit2;
+    private int firstX, secondX, leftLimit1, rightLimit1, leftLimit2, rightLimit2, leftChainSize = 1, rightChainSize = 1;
     private SparseArray<Boolean> filledChildren;
     private View leftView, rightView, lastElementLeftChain, lastElementRightChain;
 
@@ -78,6 +78,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
     public boolean onTouch(final View view, MotionEvent event) {
         final int X = (int) event.getRawX();
+        final int maxWidth = rlParent.getWidth();
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
 
             case MotionEvent.ACTION_DOWN:
@@ -187,9 +188,6 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                         leftViewParams.leftMargin = X - firstX;
                         leftView.setLayoutParams(leftViewParams);
 
-                        Log.e("lastElementLeftChain.getWidth() ----> ", "" + lastElementLeftChain.getWidth());
-                        Log.e("lastLeftChainElemParam.leftMargin ----> ", "" + lastLeftChainElemParam.leftMargin);
-
                         if (leftViewParams.leftMargin < Math.abs(lastLeftChainElemParam.leftMargin) + 60) {
                             leftViewParams.leftMargin = Math.abs(lastLeftChainElemParam.leftMargin) + 60;
                             leftView.setLayoutParams(leftViewParams);
@@ -211,11 +209,15 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                         rightViewParams.leftMargin = X - secondX;
                         rightView.setLayoutParams(rightViewParams);
 
-//                        if (rightViewParams.leftMargin > lastLeftChainElemParam.leftMargin + lastElementLeftChain.getWidth()) {
-//                            rightViewParams.leftMargin = lastLeftChainElemParam.leftMargin + lastElementLeftChain.getWidth();
-//                            rightView.setLayoutParams(rightViewParams);
-//                        } else
-                        if (rightViewParams.leftMargin > leftLimit2) { // If moving view is right view than restrict that view to move left of its current position
+                        rightLimit2 = (maxWidth - (rightChainSize * (lastElementLeftChain.getWidth() + lastRightChainElemParam.leftMargin))) + 60;
+                        Log.e("rightViewParams.leftMargin 0 ----> ", "" + rightViewParams.leftMargin);
+                        Log.e("rightlimit ----> ", "" + rightLimit2);
+
+                        if (rightViewParams.leftMargin > rightLimit2) {
+                            Log.e("rightViewParams.leftMargin 1 ----> ", "" + rightViewParams.leftMargin);
+                            rightViewParams.leftMargin = rightLimit2;
+                            rightView.setLayoutParams(rightViewParams);
+                        } else if (rightViewParams.leftMargin > leftLimit2) { // If moving view is right view than restrict that view to move left of its current position
                             rightViewParams.leftMargin = X - secondX;
                             rightView.setLayoutParams(rightViewParams);
                         } else {
@@ -250,6 +252,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             tempPrev.setLayoutParams(tempParams);
             lastElementLeftChain = tempPrev;
             id = tempPrev.getId() - 1;
+            leftChainSize++;
         }
     }
 
@@ -265,6 +268,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             tempNext.setLayoutParams(tempParams);
             lastElementRightChain = tempNext;
             id = tempNext.getId();
+            rightChainSize++;
         }
     }
 
