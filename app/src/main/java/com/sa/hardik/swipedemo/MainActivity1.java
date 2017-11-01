@@ -28,7 +28,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity1 extends Activity implements View.OnTouchListener {
-    int clickCount;
     private ViewGroup rlParent;
     private int firstX;
     private int secondX;
@@ -47,13 +46,8 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
         rlParent = findViewById(R.id.rlParent);
         filledChildren = new SparseArray<>();
         Add_Image();
-
-
         leftChain = new ArrayList<>();
         rightChain = new ArrayList<>();
-
-        clickCount = 0;
-
     }
 
 
@@ -155,12 +149,6 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                     }
                 }
 
-                if (leftView != null && rightView != null) {
-
-                    Log.e("leftView text ----> ", leftView.getText().toString());
-                    Log.e("rightView text ----> ", rightView.getText().toString());
-                }
-
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -212,9 +200,6 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                     observable.subscribeOn(Schedulers.newThread());
                     observable.observeOn(AndroidSchedulers.mainThread());
                     observable.subscribe(observer);
-
-                    // If the view is moved upon to blank view than change those views
-                    view.setLayoutParams(Params);
                 }
                 break;
 
@@ -223,9 +208,6 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
 
                 if (leftView != null && rightView != null && filledChildren.get(view.getId() - 1)) { // To check weather left and right view are not null and touched view is filled or blank if blank than not allow the touch
-
-                    Log.e("Left text ----> ", leftView.getText().toString());
-                    Log.e("Right text ----> ", rightView.getText().toString());
 
                     if (view.getId() == leftView.getId()) { // For the left view
 
@@ -285,12 +267,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
     private boolean rightViewUpEvent(View view, RelativeLayout.LayoutParams params) {
         if (rightView != null && view.getId() == rightView.getId()) { // If the right view is released than move to the relative position and release that object
-            if (validateRightUpEvent()) {
-                Log.e("validate chain movement", "Right chain move validate true");
-
-            } else {
-                Log.e("validate chain movement", "Right chain move validate false");
-            }
+            validateRightUpEvent();
             params.leftMargin = leftLimit2;
             rightView = null;
         }
@@ -299,13 +276,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
     private boolean leftViewUpEvent(View view, RelativeLayout.LayoutParams params) {
         if (leftView != null && view.getId() == leftView.getId()) { // If the Left view is released than move to the relative position and release that object
-
-            if (validateLeftUpEvent()) {
-                Log.e("validate chain movement", "Left chain move validate true");
-
-            } else {
-                Log.e("validate chain movement", "Left chain move validate false");
-            }
+            validateLeftUpEvent();
             params.leftMargin = leftLimit1;
             leftView = null;
         }
@@ -321,9 +292,6 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             TextView tempView = (TextView) rlParent.getChildAt(i);
             oldViews.put(i, new OldViewsModel(tempView.getId(), tempView.getText().toString(), !tempView.getText().toString().isEmpty()));
         }
-
-        rlParent.removeAllViews();
-        filledChildren.clear();
         repopulateViews(oldViews);
     }
 
@@ -331,6 +299,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
     @SuppressLint("ClickableViewAccessibility")
     private void repopulateViews(final SparseArray<OldViewsModel> oldViews) {
 
+        clearAll();
         for (int i = 0; i < oldViews.size(); i++) {
             final TextView iv = new TextView(MainActivity1.this);
 
@@ -359,7 +328,31 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             rlParent.addView(iv);
             iv.setOnTouchListener(MainActivity1.this);
         }
+    }
 
+    private void clearAll() {
+
+        for (int i = 0; i < rlParent.getChildCount(); i++) {
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) rlParent.getChildAt(i).getLayoutParams();
+            params.removeRule(RelativeLayout.ALIGN_TOP);
+            params.removeRule(RelativeLayout.ALIGN_LEFT);
+            params.removeRule(RelativeLayout.RIGHT_OF);
+            rlParent.getChildAt(i).setLayoutParams(params);
+        }
+
+        rlParent.removeAllViews();
+//        firstX = 0;
+//        secondX = 0;
+//        leftLimit1 = 0;
+//        rightLimit1 = 0;
+//        leftLimit2 = 0;
+//        filledChildren.clear();
+//        leftChain.clear();
+//        rightChain.clear();
+//        leftView = null;
+//        rightView = null;
+//        lastElementLeftChain = null;
+//        lastElementRightChain = null;
     }
 
     @SuppressLint("ResourceType")
@@ -410,12 +403,17 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
         } else {
             leftChain = new ArrayList<>();
         }
+        lastElementLeftChain = leftView;
         leftChain.add(leftView);
         while (filledChildren.get(id - 1) != null && filledChildren.get(id - 1)) {
             TextView tempPrev = getPrevChild(id + 1);
             leftChain.add(tempPrev);
             RelativeLayout.LayoutParams tempParams;
             if (tempPrev != null) {
+
+                Log.e("leftView text ----> ", leftView.getText().toString());
+                Log.e("tempPrev text ----> ", tempPrev.getText().toString());
+
                 tempParams = (RelativeLayout.LayoutParams) tempPrev.getLayoutParams();
                 tempParams.addRule(RelativeLayout.ALIGN_TOP, id + 1);
                 tempParams.addRule(RelativeLayout.ALIGN_LEFT, id + 1);
@@ -436,11 +434,16 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
         } else {
             rightChain = new ArrayList<>();
         }
+        lastElementRightChain = rightView;
         rightChain.add(rightView);
         while (filledChildren.get(id) != null && filledChildren.get(id)) {
             TextView tempNext = getNextChild(id);
             RelativeLayout.LayoutParams tempParams;
             if (tempNext != null) {
+
+                Log.e("rightView text ----> ", rightView.getText().toString());
+                Log.e("tempNext text ----> ", tempNext.getText().toString());
+
                 tempParams = (RelativeLayout.LayoutParams) tempNext.getLayoutParams();
                 tempParams.addRule(RelativeLayout.ALIGN_TOP, id);
                 tempParams.addRule(RelativeLayout.RIGHT_OF, id);
