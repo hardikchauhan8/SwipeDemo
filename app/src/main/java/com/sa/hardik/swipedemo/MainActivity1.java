@@ -128,7 +128,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                             firstX = Math.abs(X - firstParams.leftMargin);
                             leftLimit1 = firstParams.leftMargin;
                             rightLimit1 = firstParams.leftMargin + leftView.getWidth();
-                            createLeftChain(leftView);
+//                            createLeftChain(leftView);
                             // Note : This will add the left view to the left finger and right view to the right finger touched
 
                         } else if (prevChild != null && prevChild.getId() == leftView.getId()) {// To check weather the First touched view is previous view of second touched view
