@@ -62,7 +62,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             iv.setGravity(Gravity.CENTER);
 
             // To add blank and filled views
-            if (i == 2 || i == 3 || i == 4 || i == 5) {
+            if (i == 1 || i == 2 || i == 3 || i == 4 || i == 5 || i == 6) {
                 iv.setBackgroundColor(Color.parseColor("#000000"));
                 iv.setText(String.valueOf(i));
                 filledChildren.put(i, true);
@@ -148,7 +148,6 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                         }
                     }
                 }
-
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -192,6 +191,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                                 @Override
                                 public void run() {
                                     reloadViews();
+                                    rlParent.invalidate();
                                 }
                             });
                         }
@@ -216,6 +216,11 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
                         leftViewParams.leftMargin = X - firstX;
                         leftView.setLayoutParams(leftViewParams);
+
+
+                        Log.e("leftViewParams.leftMargin ----> ", String.valueOf(lastElementLeftChain.getLeft()));
+                        Log.e("lastElementLeftChain.getText() ----> ", lastElementLeftChain.getText().toString());
+                        Log.e("Math.abs(lastLeftChainElemParam.leftMargin) + 60 ----> ", String.valueOf(Math.abs(lastLeftChainElemParam.leftMargin) + 60));
 
                         if (leftViewParams.leftMargin < Math.abs(lastLeftChainElemParam.leftMargin) + 60) {
                             leftViewParams.leftMargin = Math.abs(lastLeftChainElemParam.leftMargin) + 60;
@@ -341,18 +346,18 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
         }
 
         rlParent.removeAllViews();
-//        firstX = 0;
-//        secondX = 0;
-//        leftLimit1 = 0;
-//        rightLimit1 = 0;
-//        leftLimit2 = 0;
-//        filledChildren.clear();
-//        leftChain.clear();
-//        rightChain.clear();
-//        leftView = null;
-//        rightView = null;
-//        lastElementLeftChain = null;
-//        lastElementRightChain = null;
+        firstX = 0;
+        secondX = 0;
+        leftLimit1 = 0;
+        rightLimit1 = 0;
+        leftLimit2 = 0;
+        filledChildren.clear();
+        leftChain.clear();
+        rightChain.clear();
+        leftView = null;
+        rightView = null;
+        lastElementLeftChain = null;
+        lastElementRightChain = null;
     }
 
     @SuppressLint("ResourceType")
@@ -362,6 +367,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
         if (params.leftMargin == leftLimit1) {
             return true;
         } else {
+
             for (int i = leftChain.size() - 1; i >= 0; i--) {
                 TextView temp = getChild(leftChain.get(i).getId(), leftChain.get(i).getX());
                 if (temp != null && !filledChildren.get(temp.getId() - 1)) {
