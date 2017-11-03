@@ -86,7 +86,8 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
     @SuppressLint({"ResourceType", "ClickableViewAccessibility"})
     public boolean onTouch(final View view, MotionEvent event) {
-        final int X = (int) event.getRawX();
+        final int X1 = (int) event.getRawX();
+        final int X2 = (int) event.getRawX();
         final int maxWidth = rlParent.getWidth();
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
 
@@ -101,9 +102,12 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
                         // Assign the first touched view into leftView
                         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) leftView.getLayoutParams();
-                        firstX = Math.abs(X - layoutParams.leftMargin);
+                        firstX = Math.abs(X1 - layoutParams.leftMargin);
                         leftLimit1 = layoutParams.leftMargin;
                         rightLimit1 = layoutParams.leftMargin + leftView.getWidth();
+
+                        Log.e("X1 0 ----> ", String.valueOf(X1));
+                        Log.e("firstX 0 ----> ", String.valueOf(firstX));
 
                         createLeftChain(leftView);
                     } else {
@@ -117,7 +121,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                             // assign the leftview to rightview
                             rightView = leftView;
                             RelativeLayout.LayoutParams secondParams = (RelativeLayout.LayoutParams) rightView.getLayoutParams();
-                            secondX = Math.abs(X - secondParams.leftMargin);
+                            secondX = Math.abs(X2 - secondParams.leftMargin);
                             leftLimit2 = secondParams.leftMargin;
                             rightLimit2 = secondParams.leftMargin + rightView.getWidth();
                             createRightChain(rightView);
@@ -125,9 +129,13 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                             // assign the second touched view to left view
                             leftView = (TextView) view;
                             RelativeLayout.LayoutParams firstParams = (RelativeLayout.LayoutParams) leftView.getLayoutParams();
-                            firstX = Math.abs(X - firstParams.leftMargin);
+                            firstX = Math.abs(X1 - firstParams.leftMargin);
                             leftLimit1 = firstParams.leftMargin;
                             rightLimit1 = firstParams.leftMargin + leftView.getWidth();
+
+                            Log.e("X1 1 ----> ", String.valueOf(X1));
+                            Log.e("firstX 1 ----> ", String.valueOf(firstX));
+
 //                            createLeftChain(leftView);
                             // Note : This will add the left view to the left finger and right view to the right finger touched
 
@@ -136,7 +144,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                             // assign second touched view to the right view
                             rightView = (TextView) view;
                             RelativeLayout.LayoutParams secondParams = (RelativeLayout.LayoutParams) rightView.getLayoutParams();
-                            secondX = Math.abs(X - secondParams.leftMargin);
+                            secondX = Math.abs(X2 - secondParams.leftMargin);
                             leftLimit2 = secondParams.leftMargin;
                             rightLimit2 = secondParams.leftMargin + rightView.getWidth();
                             createRightChain(rightView);
@@ -178,7 +186,6 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
 
                         @Override
                         public void onNext(Boolean value) {
-                            Log.e("value", "" + value);
                         }
 
                         @Override
@@ -214,19 +221,22 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                         RelativeLayout.LayoutParams leftViewParams = (RelativeLayout.LayoutParams) leftView.getLayoutParams();
                         RelativeLayout.LayoutParams lastLeftChainElemParam = (RelativeLayout.LayoutParams) lastElementLeftChain.getLayoutParams();
 
-                        leftViewParams.leftMargin = X - firstX;
+//                        Log.e("X1 ----> ", String.valueOf(X1));
+//                        Log.e("firstX ----> ", String.valueOf(firstX));
+
+                        leftViewParams.leftMargin = X1 - firstX;
                         leftView.setLayoutParams(leftViewParams);
 
 
-                        Log.e("leftViewParams.leftMargin ----> ", String.valueOf(lastElementLeftChain.getLeft()));
-                        Log.e("lastElementLeftChain.getText() ----> ", lastElementLeftChain.getText().toString());
-                        Log.e("Math.abs(lastLeftChainElemParam.leftMargin) + 60 ----> ", String.valueOf(Math.abs(lastLeftChainElemParam.leftMargin) + 60));
+//                        Log.e("leftViewParams.leftMargin ----> ", String.valueOf(leftViewParams.leftMargin));
+//                        Log.e("lastElementLeftChain.getText() ----> ", lastElementLeftChain.getText().toString());
+//                        Log.e("Math.abs(lastLeftChainElemParam.leftMargin) + 60 ----> ", String.valueOf(Math.abs(lastLeftChainElemParam.leftMargin) + 60));
 
                         if (leftViewParams.leftMargin < Math.abs(lastLeftChainElemParam.leftMargin) + 60) {
                             leftViewParams.leftMargin = Math.abs(lastLeftChainElemParam.leftMargin) + 60;
                             leftView.setLayoutParams(leftViewParams);
                         } else if ((leftViewParams.leftMargin + view.getWidth()) < rightLimit1) { // If moving view is left view than restrict that view to move right of its current position
-                            leftViewParams.leftMargin = X - firstX;
+                            leftViewParams.leftMargin = X1 - firstX;
                             leftView.setLayoutParams(leftViewParams);
                         } else {
                             leftViewParams.leftMargin = rightLimit1 - view.getWidth();
@@ -240,7 +250,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                         RelativeLayout.LayoutParams rightViewParams = (RelativeLayout.LayoutParams) rightView.getLayoutParams();
                         RelativeLayout.LayoutParams lastRightChainElemParam = (RelativeLayout.LayoutParams) lastElementRightChain.getLayoutParams();
 
-                        rightViewParams.leftMargin = X - secondX;
+                        rightViewParams.leftMargin = X2 - secondX;
                         rightView.setLayoutParams(rightViewParams);
 
                         rightLimit2 = (maxWidth - (rightChain.size() * (lastElementLeftChain.getWidth() + lastRightChainElemParam.leftMargin))) + 60;
@@ -249,7 +259,7 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
                             rightViewParams.leftMargin = rightLimit2;
                             rightView.setLayoutParams(rightViewParams);
                         } else if (rightViewParams.leftMargin > leftLimit2) { // If moving view is right view than restrict that view to move left of its current position
-                            rightViewParams.leftMargin = X - secondX;
+                            rightViewParams.leftMargin = X2 - secondX;
                             rightView.setLayoutParams(rightViewParams);
                         } else {
                             rightViewParams.leftMargin = leftLimit2;
@@ -417,9 +427,6 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             RelativeLayout.LayoutParams tempParams;
             if (tempPrev != null) {
 
-                Log.e("leftView text ----> ", leftView.getText().toString());
-                Log.e("tempPrev text ----> ", tempPrev.getText().toString());
-
                 tempParams = (RelativeLayout.LayoutParams) tempPrev.getLayoutParams();
                 tempParams.addRule(RelativeLayout.ALIGN_TOP, id + 1);
                 tempParams.addRule(RelativeLayout.ALIGN_LEFT, id + 1);
@@ -446,9 +453,6 @@ public class MainActivity1 extends Activity implements View.OnTouchListener {
             TextView tempNext = getNextChild(id);
             RelativeLayout.LayoutParams tempParams;
             if (tempNext != null) {
-
-                Log.e("rightView text ----> ", rightView.getText().toString());
-                Log.e("tempNext text ----> ", tempNext.getText().toString());
 
                 tempParams = (RelativeLayout.LayoutParams) tempNext.getLayoutParams();
                 tempParams.addRule(RelativeLayout.ALIGN_TOP, id);
